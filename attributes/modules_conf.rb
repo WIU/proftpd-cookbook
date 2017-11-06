@@ -31,16 +31,27 @@ end
 
 default['proftpd']['conf']['if_module']['dso']['module_controls_acls'] = [
   'insmod,rmmod allow user root',
-  'lsmod allow user *'
+  'lsmod allow user *',
 ]
 
 # we need to use an array to preserver the order
-default['proftpd']['conf']['if_module']['dso']['load_module'] = %w(
-  dso ctrls_admin tls radius quotatab quotatab_file
-  quotatab_radius wrap rewrite load ban wrap2
-  wrap2_file ratio site_misc
-  facl ifsession
-)
+# Make sure we only include external libraries in this list
+case node['platform_family']
+when 'rhel'
+  default['proftpd']['conf']['if_module']['dso']['load_module'] = %w(
+    ctrls_admin radius quotatab quotatab_file
+    quotatab_radius wrap rewrite load ban wrap2
+    wrap2_file ratio site_misc
+    facl ifsession
+  )
+when 'debian'
+  default['proftpd']['conf']['if_module']['dso']['load_module'] = %w(
+    ctrls_admin tls radius quotatab quotatab_file
+    quotatab_radius wrap rewrite load ban wrap2
+    wrap2_file ratio site_misc
+    facl ifsession
+  )
+end
 
 default['proftpd']['conf']['if_module']['ctrls_admin']['prefix'] =
   'AdminControls'

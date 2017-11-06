@@ -60,6 +60,7 @@ desc 'Generate Ruby documentation'
 task doc: %w(yard)
 
 namespace :style do
+  require 'cookstyle'
   require 'rubocop/rake_task'
   desc 'Run Ruby style checks using rubocop'
   RuboCop::RakeTask.new(:ruby)

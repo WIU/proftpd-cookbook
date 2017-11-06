@@ -36,11 +36,7 @@ describe 'onddo_proftpd::default' do
     ).and_return(true)
   end
 
-  it 'includes onddo_proftpd::ohai_plugin recipe' do
-    expect(chef_run).to include_recipe('onddo_proftpd::ohai_plugin')
-  end
-
-  %w(redhat@5.10 centos@5.10 amazon@2014.03).each do |platform_info|
+  %w(redhat@6.9 redhat@7.4 centos@6.9 centos@7.4.1708).each do |platform_info|
     platform, version = platform_info.split('@', 2)
     context "in #{platform} platform" do
       let(:chef_runner) do
@@ -53,7 +49,7 @@ describe 'onddo_proftpd::default' do
     end
   end # redhat centos amazon platforms
 
-  %w(debian@7.0 ubuntu@12.04).each do |platform_info|
+  %w(debian@7.11 debian@8.9 debian@9.1 ubuntu@14.04 ubuntu@16.04).each do |platform_info|
     platform, version = platform_info.split('@', 2)
     context "on #{platform} platform" do
       let(:chef_runner) do
@@ -66,47 +62,17 @@ describe 'onddo_proftpd::default' do
     end
   end # debian ubuntu platforms
 
-  %w(fedora@20).each do |platform_info|
-    platform, version = platform_info.split('@', 2)
-    context "on #{platform} platform" do
-      let(:chef_runner) do
-        ChefSpec::SoloRunner.new(platform: platform, version: version)
-      end
-
-      it 'upgrades old versions of openssl' do
-        stub_command(
-          "file /usr/lib*/libcrypto.so.[0-9]* | awk '$2 == \"ELF\" {print $1}'"\
-          " | cut -d: -f1 | xargs readelf -s | grep -Fwq 'OPENSSL_'"
-        ).and_return(false)
-        expect(chef_run).to upgrade_package('openssl')
-      end
-
-      it 'does not upgrade new versions of openssl' do
-        stub_command(
-          "file /usr/lib*/libcrypto.so.[0-9]* | awk '$2 == \"ELF\" {print $1}'"\
-          " | cut -d: -f1 | xargs readelf -s | grep -Fwq 'OPENSSL_'"
-        ).and_return(true)
-        expect(chef_run).to_not upgrade_package('openssl')
-      end
-    end
-  end # fedora platform
-
   it 'installs proftpd package' do
     expect(chef_run).to install_package('proftpd')
   end
 
-  it 'proftpd package notifies ohai plugin' do
-    resource = chef_run.package('proftpd')
-    expect(resource).to notify('ohai[reload_proftpd]').to(:reload).immediately
-  end
-
   module_packages = {
-    'redhat@5.10 centos@5.10 fedora@20 suse@11.1 amazon@2014.03' => {
+    'redhat@6.9 centos@6.9 redhat@7.4 centos@7.4.1708' => {
       ldap: 'proftpd-ldap',
       sql_mysql: 'proftpd-mysql',
-      sql_postgres: 'proftpd-postgresql'
+      sql_postgres: 'proftpd-postgresql',
     },
-    'debian@7.0 ubuntu@12.04' => {
+    'debian@7.11 debian@8.9 debian@9.1 ubuntu@14.04 ubuntu@16.04' => {
       autohost: 'proftpd-mod-autohost',
       case: 'proftpd-mod-case',
       clamav: 'proftpd-mod-clamav',
@@ -119,8 +85,8 @@ describe 'onddo_proftpd::default' do
       sql_odbc: 'proftpd-mod-odbc',
       sql_postgres: 'proftpd-mod-pgsql',
       sql_sqlite: 'proftpd-mod-sqlite',
-      tar: 'proftpd-mod-tar'
-    }
+      tar: 'proftpd-mod-tar',
+    },
   }
 
   module_packages.each do |platforms, mods|
@@ -204,33 +170,6 @@ describe 'onddo_proftpd::default' do
   it '/etc/proftpd.conf link notifies proftpd service' do
     resource = chef_run.link('/etc/proftpd.conf')
     expect(resource).to notify('service[proftpd]').to(:restart).delayed
-  end
-
-  it 'fixes ubuntu 14.04 logrotate bug (1293416)' do
-    stub_command(
-      "    grep -q 'start-stop-daemon --stop --signal $SIGNAL --quiet "\
-      "--pidfile \"$PIDFILE\"$' /etc/init.d/proftpd\n"
-    ).and_return(true)
-    expect(chef_run)
-      .to run_execute('Fix for Ubuntu 14.04 proftpd+logrotate bug')
-  end
-
-  it 'logrotate bugfix notifies proftpd service' do
-    stub_command(
-      "    grep -q 'start-stop-daemon --stop --signal $SIGNAL --quiet "\
-      "--pidfile \"$PIDFILE\"$' /etc/init.d/proftpd\n"
-    ).and_return(true)
-    resource = chef_run.execute('Fix for Ubuntu 14.04 proftpd+logrotate bug')
-    expect(resource).to notify('service[proftpd]').to(:restart).delayed
-  end
-
-  it 'does not fix logrotate bug when not needed' do
-    stub_command(
-      "    grep -q 'start-stop-daemon --stop --signal $SIGNAL --quiet "\
-      "--pidfile \"$PIDFILE\"$' /etc/init.d/proftpd\n"
-    ).and_return(false)
-    expect(chef_run)
-      .not_to run_execute('Fix for Ubuntu 14.04 proftpd+logrotate bug')
   end
 
   it 'enables proftpd service' do

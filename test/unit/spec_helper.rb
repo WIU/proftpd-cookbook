@@ -41,7 +41,7 @@ RSpec.configure do |config|
   config.formatter = :documentation
   config.tty = true
   config.platform = 'ubuntu'
-  config.version = '12.04'
+  config.version = '16.04'
 end
 
 # at_exit { ChefSpec::Coverage.report! } # still in beta

@@ -24,7 +24,7 @@ user 'user1' do
   # password 'user1'
   password '$6$5naWIHNh$txoUAK0hpCcYvAQv0oi9klC5uvCwwmJatbvPH6.SBOyAlspBlgssw0'\
            'BZNZRQch/G.Ad60QEFX4OCGNOu2xEqs.'
-  supports manage_home: true
+  manage_home true
   shell '/bin/bash'
 end
 group 'user1' do
@@ -59,12 +59,12 @@ node.default['proftpd']['conf']['virtual_host']['ftp.server.com'] = {
   'max_login_attempts' => 3,
   'require_valid_shell' => false,
   'default_root' => '/tmp',
-  'allow_overwrite' => true
+  'allow_overwrite' => true,
 }
 
 user 'ftp' do
   system true
-  supports manage_home: true
+  manage_home true
 end
 ruby_block 'ensure ftp user home creation' do
   block do
@@ -94,22 +94,22 @@ node.default['proftpd']['conf']['anonymous']['~ftp'] = {
     '*' => {
       'limit' => {
         'write' => {
-          'deny_all' => nil
-        }
-      }
+          'deny_all' => nil,
+        },
+      },
     },
     'incoming' => {
       'umask' => '022 022',
       'limit' => {
         'read write' => {
-          'deny_all' => nil
+          'deny_all' => nil,
         },
         'stor' => {
-          'allow_all' => nil
-        }
-      }
-    }
-  }
+          'allow_all' => nil,
+        },
+      },
+    },
+  },
 }
 
 # This is used for ordinary LDAP connections, with or without TLS
@@ -237,7 +237,7 @@ vhost['127.0.0.1'] = {
   'vroot_engine' => true,
   'vroot_server_root' => '/tmp',
   'vroot_options' => 'allowSymlinks',
-  'default_root' => '~'
+  'default_root' => '~',
 }
 
 # we need to use an array to preserver the order

@@ -19,28 +19,19 @@
 # limitations under the License.
 #
 
-include_recipe 'onddo_proftpd::ohai_plugin'
+# Ohai Plugin
+ohai_plugin 'proftpd' do
+  source_file 'proftpd.rb.erb'
+  resource :template
+end
 
 include_recipe 'yum-epel' if platform?('redhat', 'centos', 'amazon')
-
-# Bugfix: relocation error: proftpd: symbol SSLeay_version, version
-# OPENSSL_1.0.1 not defined in file libcrypto.so.10 with link time reference
-if platform?('fedora')
-  package 'openssl' do
-    action :upgrade
-    not_if 'file /usr/lib*/libcrypto.so.[0-9]* | '\
-           "awk '$2 == \"ELF\" {print $1}' | cut -d: -f1 | xargs readelf -s | "\
-           "grep -Fwq 'OPENSSL_'"
-  end
-end
 
 #
 # Install required packages
 #
 
-package 'proftpd' do
-  notifies :reload, 'ohai[reload_proftpd]', :immediately
-end
+package 'proftpd'
 
 if node['proftpd']['conf']['if_module']['dso']['load_module'].include?('dso')
   node['proftpd']['conf']['if_module']['dso']['load_module'].uniq.each do |mod|
@@ -89,24 +80,7 @@ link '/etc/proftpd.conf' do
   notifies :restart, 'service[proftpd]'
 end
 
-# https://bugs.launchpad.net/ubuntu/+source/proftpd-dfsg/+bug/1293416
-regexp_line = 'start-stop-daemon --stop --signal $SIGNAL --quiet '\
-  '--pidfile "$PIDFILE"$'
-execute 'Fix for Ubuntu 14.04 proftpd+logrotate bug' do
-  command <<-EOF
-    sed -i 's/#{regexp_line}/& --retry 1/' /etc/init.d/proftpd
-  EOF
-  only_if <<-EOF
-    grep -q '#{regexp_line}' /etc/init.d/proftpd
-  EOF
-  notifies :restart, 'service[proftpd]'
-end
-
 service 'proftpd' do
-  if node['platform'] == 'ubuntu' &&
-     Gem::Version.new(node['platform_version']) >= Gem::Version.new('15.04')
-    provider Chef::Provider::Service::Debian
-  end
   supports restart: true, reload: true, status: true
   action [:enable, :start]
 end

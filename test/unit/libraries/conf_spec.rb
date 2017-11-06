@@ -28,7 +28,7 @@ describe ProFTPD::Conf do
       'UseIpv6' => 'UseIPv6',
       'VrootEngine' => 'VRootEngine',
       'TlsCaCertificateFile' => 'TLSCACertificateFile',
-      'TlsVerifyClient' => 'TLSVerifyClient'
+      'TlsVerifyClient' => 'TLSVerifyClient',
     }.each do |orig, new|
       it "returns #{new.inspect} from #{orig.inspect}" do
         expect(described_class.attribute_name(orig, '')).to eq(new)

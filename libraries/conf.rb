@@ -33,6 +33,7 @@ module ProFTPD
 <% end -%>
 </<%= @block.capitalize %>>
         EOT
+        CONFIGURATION_BLOCK.freeze
       end
     end
 
@@ -52,7 +53,6 @@ module ProFTPD
       /^(.*)PamConfig$/ =>   '%{a}PAMConfig',
       /^(.*)Rfc([0-9]+)$/ => '%{a}RFC%{b}',
       /^Sql(.*)$/ =>         'SQL%{a}',
-      /^Sql(.*)$/ =>         'SQL%{a}',
       /^Tcp(.*)$/ =>         'TCP%{a}',
       /^(.*)Tls$/ =>         '%{a}TLS',
       /^TlsCa(.*)$/ =>       'TLSCA%{a}',
@@ -62,8 +62,8 @@ module ProFTPD
       /^Tls(.*)$/ =>         'TLS%{a}',
       /^(.*)Uid(.*)$/ =>     '%{a}UID%{b}',
       /^(.*)Utf8$/ =>        '%{a}UTF8',
-      /^Vroot(.*)$/ =>       'VRoot%{a}'
-    } unless defined?(ProFTPD::Conf::ATTRIBUTE_NAMES_REGEXP)
+      /^Vroot(.*)$/ =>       'VRoot%{a}',
+    }.freeze unless defined?(ProFTPD::Conf::ATTRIBUTE_NAMES_REGEXP)
 
     # rubocop:disable Style/ClassVars
 
