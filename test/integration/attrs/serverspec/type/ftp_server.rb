@@ -35,11 +35,8 @@ module Serverspec
 
       protected
 
-      def ftp
-        @ftp ||= ::Net::FTP.new(@host)
-      end
-
       def ftp_connect
+        @ftp ||= ::Net::FTP.new(@host)
       end
 
       def ftp_close
@@ -54,7 +51,6 @@ module Serverspec
       public
 
       def connects?
-        ftp
         ftp_connect
         ftp_close
         true
@@ -64,8 +60,9 @@ module Serverspec
 
       def authenticates?(user, pass)
         ftp_connect
-        ftp.login(user, pass)
-        ftp.list
+        @ftp.login(user, pass)
+        @ftp.chdir('/')
+        @ftp.list
         ftp_close
         true
       rescue ::SocketError, ::Errno::ETIMEDOUT, ::Net::FTPPermError

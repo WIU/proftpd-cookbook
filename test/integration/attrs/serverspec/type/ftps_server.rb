@@ -18,32 +18,14 @@
 #
 
 require_relative 'ftp_server'
-require 'double_bag_ftps'
 
 module Serverspec
   # Serverspec resource types.
   module Type
     # Serverspec FTP resource type.
     class FtpsServer < FtpServer
-      def to_s
-        %(FTP "ftps://#{@host}")
-      end
-
       def ftp_connect
-        ftp.connect(@host)
-        # Fix https://github.com/bnix/double-bag-ftps/issues/9
-        ftp.send(:decorate_socket, ftp.instance_variable_get(:@sock))
-      end
-
-      def ftp
-        @ftp ||= begin
-          DoubleBagFTPS.new.tap do |ftps|
-            ftps.ssl_context =
-              DoubleBagFTPS.create_ssl_context(
-                verify_mode: OpenSSL::SSL::VERIFY_NONE
-              )
-          end
-        end
+        @ftp ||= ::Net::FTP.new(@host, { ssl: { verify_mode: OpenSSL::SSL::VERIFY_NONE } })
       end
     end
 

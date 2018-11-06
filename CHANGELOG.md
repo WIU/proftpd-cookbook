@@ -3,6 +3,11 @@ onddo_proftpd CHANGELOG
 
 This file is used to list changes made in each version of the `onddo_proftpd` cookbook.
 
+## v3.0.0 (2018-11-06)
+
+* Chef 14 Support
+* Fix integration tests
+
 ## v2.1.0 (2015-09-08)
 
 * Fix Ubuntu `15.04` support.

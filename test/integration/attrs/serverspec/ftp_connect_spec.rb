@@ -22,14 +22,14 @@ require 'type/ftp_server'
 require 'type/ftps_server'
 
 context 'FTP connection' do
-  describe ftp_server('localhost') do
+  describe ftp_server('127.0.0.1') do
     it { should connect }
     it { should authenticate 'user1', 'user1' }
     it { should authenticate 'anonymous', nil }
     it { should_not authenticate 'baduser', 'baduser' }
   end
 
-  describe ftps_server('localhost') do
+  describe ftps_server('127.0.0.1') do
     it { should connect }
     it { should authenticate 'user1', 'user1' }
   end
